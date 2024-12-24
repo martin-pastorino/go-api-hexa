@@ -58,3 +58,8 @@ func (uc *CreateUser) GetUser(email string) (domain.User, error) {
 
 	return user, nil
 }
+
+// DeleteUser implements incoming.UserService.
+func (uc *CreateUser) DeleteUser(email string) error {
+	return uc.UserRepository.DeleteUser(email)
+}

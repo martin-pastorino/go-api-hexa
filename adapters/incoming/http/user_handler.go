@@ -21,6 +21,7 @@ func NewUserHandlerProvider(userService incoming.UserService) *UserHandler {
 	return NewUserHandler(userService)
 }
 
+//// CreateUser godoc
 func (uh *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var userRequest struct {
 		Name  string `json:"name"`
@@ -43,6 +44,7 @@ func (uh *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"id": userID})
 }
 
+//// GetUser godoc
 func (uh *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
 	user, err := uh.userService.GetUser(email)
@@ -53,4 +55,15 @@ func (uh *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(user)
+}
+
+func (uh *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	email := r.URL.Query().Get("email")
+	err := uh.userService.DeleteUser(email)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

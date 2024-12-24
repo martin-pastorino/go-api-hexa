@@ -25,6 +25,7 @@ func main() {
 
 	r.Post("/users", userHandler.CreateUser)
 	r.Get("/users", userHandler.GetUser)
+	r.Delete("/users", userHandler.DeleteUser)
 
 	http.ListenAndServe( fmt.Sprintf(":%d",port), r)
 }

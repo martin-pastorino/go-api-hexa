@@ -70,3 +70,15 @@ func (r *UserRepository) GetUser(email string) (domain.User, error) {
 	return user, nil
 	
 }
+
+// DeleteUser implements outgoing.UserRepository.
+func (r *UserRepository) DeleteUser(email string) error {
+	key := fmt.Sprintf("user:%s", email)
+	err := r.redisCLient.Del(ctx, key).Err()
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("User deleted from database")
+	return nil
+}
