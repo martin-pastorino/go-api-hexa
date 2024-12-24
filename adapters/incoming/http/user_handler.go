@@ -1,10 +1,9 @@
 package http
 
 import (
+	"api/core/ports/incoming"
 	"encoding/json"
 	"net/http"
-	"api/core/ports/incoming"
-
 )
 
 type UserHandler struct {
@@ -19,7 +18,7 @@ func NewUserHandler(userService incoming.UserService) *UserHandler {
 
 // Provider for UserHandler
 func NewUserHandlerProvider(userService incoming.UserService) *UserHandler {
-    return NewUserHandler(userService)
+	return NewUserHandler(userService)
 }
 
 func (uh *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
