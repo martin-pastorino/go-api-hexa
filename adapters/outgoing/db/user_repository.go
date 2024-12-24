@@ -50,5 +50,23 @@ func (r *UserRepository) Save(user domain.User) (string, error) {
 	}
 
 	fmt.Println("User saved to database")
-	return "user_id", nil
+	return user.ID, nil
+}
+
+// GetUser implements outgoing.UserRepository.
+func (r *UserRepository) GetUser(email string) (domain.User, error) {
+	var user domain.User
+	result := r.redisCLient.Get(ctx, fmt.Sprintf("user:%s", email)).Val()
+
+	if result == "" {
+		return domain.User{}, fmt.Errorf("user not found")
+	}
+
+	err := json.Unmarshal([]byte(result),&user)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	return user, nil
+	
 }

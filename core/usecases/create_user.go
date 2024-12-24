@@ -13,7 +13,6 @@ type CreateUser struct {
 	Notifier       outgoing.Notifier
 }
 
-
 // Provider for CreateUser use case
 func NewCreateUserProvider(userRepo outgoing.UserRepository, notifier outgoing.Notifier) incoming.UserService {
 	return NewCreateUser(userRepo, notifier)
@@ -51,5 +50,11 @@ func (uc *CreateUser) CreateUser(name, email string) (string, error) {
 
 // GetUser implements incoming.UserService.
 func (uc *CreateUser) GetUser(email string) (domain.User, error) {
-	panic("unimplemented")
+
+	user, err := uc.UserRepository.GetUser(email)
+	if err != nil {
+		return domain.User{}, err
+	}
+
+	return user, nil
 }

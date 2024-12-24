@@ -24,6 +24,7 @@ func main() {
 	 userHandler := app.InitializeUserHandler()	
 
 	r.Post("/users", userHandler.CreateUser)
+	r.Get("/users", userHandler.GetUser)
 
 	http.ListenAndServe( fmt.Sprintf(":%d",port), r)
 }
