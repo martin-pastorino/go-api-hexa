@@ -2,32 +2,37 @@ package usecases
 
 import (
 	"api/core/domain"
+	"api/core/ports/incoming"
 	"api/core/ports/outgoing"
 
 	"github.com/google/uuid"
 )
 
-
 type CreateUser struct {
 	UserRepository outgoing.UserRepository
-	Notifier outgoing.Notifier
+	Notifier       outgoing.Notifier
+}
+
+
+// Provider for CreateUser use case
+func NewCreateUserProvider(userRepo outgoing.UserRepository, notifier outgoing.Notifier) incoming.UserService {
+	return NewCreateUser(userRepo, notifier)
 }
 
 func NewCreateUser(userRepository outgoing.UserRepository, notifier outgoing.Notifier) *CreateUser {
 	return &CreateUser{
 		UserRepository: userRepository,
-		Notifier: notifier,
+		Notifier:       notifier,
 	}
 }
 
 func (uc *CreateUser) CreateUser(name, email string) (string, error) {
 
-
-	userID:= uuid.New().String()	
+	userID := uuid.New().String()
 
 	user := domain.User{
-		ID: userID,
-		Name: name,
+		ID:    userID,
+		Name:  name,
 		Email: email,
 	}
 
@@ -42,4 +47,9 @@ func (uc *CreateUser) CreateUser(name, email string) (string, error) {
 	}
 
 	return id, nil
+}
+
+// GetUser implements incoming.UserService.
+func (uc *CreateUser) GetUser(email string) (domain.User, error) {
+	panic("unimplemented")
 }

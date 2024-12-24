@@ -1,7 +1,7 @@
 package main
 
 import (
-	"api/internal/models"
+	"api/cmd/app"
 	"fmt"
 	"net/http"
 
@@ -10,7 +10,7 @@ import (
 	"github.com/go-chi/render"
 )
 
-var port int16
+var port int16 = 8080
 func main() {
 	r := chi.NewRouter()
 
@@ -21,14 +21,9 @@ func main() {
 	r.Use(middleware.Recoverer)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
-	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello world!"))
-	})
+	 userHandler := app.InitializeUserHandler()	
 
-	r.Get("/person", func(w http.ResponseWriter, r *http.Request) {
-		p :=  models.Person{Name: "Martin", Age: 30}
-		render.Render(w, r,p)
-	})
+	r.Post("/users", userHandler.CreateUser)
 
 	http.ListenAndServe( fmt.Sprintf(":%d",port), r)
 }

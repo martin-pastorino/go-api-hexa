@@ -17,6 +17,11 @@ func NewUserHandler(userService incoming.UserService) *UserHandler {
 	}
 }
 
+// Provider for UserHandler
+func NewUserHandlerProvider(userService incoming.UserService) *UserHandler {
+    return NewUserHandler(userService)
+}
+
 func (uh *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var userRequest struct {
 		Name  string `json:"name"`
@@ -31,7 +36,7 @@ func (uh *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	userID, err := uh.userService.CreateUser(userRequest.Name, userRequest.Email)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusConflict)
 		return
 	}
 
