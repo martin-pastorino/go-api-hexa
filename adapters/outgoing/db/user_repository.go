@@ -78,7 +78,7 @@ func (r *UserRepository) DeleteUser(email string) error {
 	if err != nil {
 		return err
 	}
-
+	
 	fmt.Println("User deleted from database")
 	return nil
 }
