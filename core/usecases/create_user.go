@@ -9,8 +9,8 @@ import (
 )
 
 type CreateUser struct {
-	UserRepository outgoing.UserRepository
-	Notifier       outgoing.Notifier
+	userRepository outgoing.UserRepository
+	notifier       outgoing.Notifier
 }
 
 // Provider for CreateUser use case
@@ -20,8 +20,8 @@ func NewCreateUserProvider(userRepo outgoing.UserRepository, notifier outgoing.N
 
 func NewCreateUser(userRepository outgoing.UserRepository, notifier outgoing.Notifier) *CreateUser {
 	return &CreateUser{
-		UserRepository: userRepository,
-		Notifier:       notifier,
+		userRepository: userRepository,
+		notifier:       notifier,
 	}
 }
 
@@ -35,12 +35,12 @@ func (uc *CreateUser) CreateUser(name, email string) (string, error) {
 		Email: email,
 	}
 
-	id, err := uc.UserRepository.Save(user)
+	id, err := uc.userRepository.Save(user)
 	if err != nil {
 		return "", err
 	}
 
-	err = uc.Notifier.SendWelcomeEmail(email)
+	err = uc.notifier.SendWelcomeEmail(email)
 	if err != nil {
 		return "", err
 	}
@@ -51,7 +51,7 @@ func (uc *CreateUser) CreateUser(name, email string) (string, error) {
 // GetUser implements incoming.UserService.
 func (uc *CreateUser) GetUser(email string) (domain.User, error) {
 
-	user, err := uc.UserRepository.GetUser(email)
+	user, err := uc.userRepository.GetUser(email)
 	if err != nil {
 		return domain.User{}, err
 	}
@@ -61,5 +61,5 @@ func (uc *CreateUser) GetUser(email string) (domain.User, error) {
 
 // DeleteUser implements incoming.UserService.
 func (uc *CreateUser) DeleteUser(email string) error {
-	return uc.UserRepository.DeleteUser(email)
+	return uc.userRepository.DeleteUser(email)
 }

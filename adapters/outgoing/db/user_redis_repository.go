@@ -10,6 +10,12 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+const (
+	// RedisHost is the host of the Redis server.
+	RedisHost = "localhost:6379"
+	KEY_USER_CACHE = "user:%s"
+)
+
 var ctx = context.Background()
 
 type UserRepository struct {
@@ -19,7 +25,7 @@ type UserRepository struct {
 func NewUserRepository() *UserRepository {
 	return &UserRepository{
 		redisCLient: redis.NewClient(&redis.Options{
-			Addr:     "localhost:6379",
+			Addr:     RedisHost,
 			Password: "", // no password set
 			DB:       0,  // use default DB
 		}),
@@ -33,7 +39,7 @@ func NewUserRepositoryProvider() outgoing.UserRepository {
 
 func (r *UserRepository) Save(user domain.User) (string, error) {
 	// Save user to database
-	key := fmt.Sprintf("user:%s", user.Email)
+	key := fmt.Sprintf(KEY_USER_CACHE, user.Email)
 
 	if exists := r.redisCLient.Exists(ctx, key); exists.Val() == 1 {
 		return "", fmt.Errorf("user already exists")
@@ -56,7 +62,7 @@ func (r *UserRepository) Save(user domain.User) (string, error) {
 // GetUser implements outgoing.UserRepository.
 func (r *UserRepository) GetUser(email string) (domain.User, error) {
 	var user domain.User
-	result := r.redisCLient.Get(ctx, fmt.Sprintf("user:%s", email)).Val()
+	result := r.redisCLient.Get(ctx, fmt.Sprintf(KEY_USER_CACHE, email)).Val()
 
 	if result == "" {
 		return domain.User{}, fmt.Errorf("user not found")
@@ -73,7 +79,7 @@ func (r *UserRepository) GetUser(email string) (domain.User, error) {
 
 // DeleteUser implements outgoing.UserRepository.
 func (r *UserRepository) DeleteUser(email string) error {
-	key := fmt.Sprintf("user:%s", email)
+	key := fmt.Sprintf(KEY_USER_CACHE, email)
 	err := r.redisCLient.Del(ctx, key).Err()
 	if err != nil {
 		return err
