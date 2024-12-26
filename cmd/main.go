@@ -2,6 +2,7 @@ package main
 
 import (
 	"api/cmd/app"
+	"api/infra/router"
 	"fmt"
 	"net/http"
 
@@ -21,11 +22,6 @@ func main() {
 	r.Use(middleware.Recoverer)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
-	 userHandler := app.InitializeUserHandler()	
-
-	r.Post("/users", userHandler.CreateUser)
-	r.Get("/users", userHandler.GetUser)
-	r.Delete("/users", userHandler.DeleteUser)
-
+	r.Mount("/users", router.UsersAPIRouter(app.InitializeUsersHandler()) )
 	http.ListenAndServe( fmt.Sprintf(":%d",port), r)
 }

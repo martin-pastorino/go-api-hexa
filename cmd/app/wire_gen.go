@@ -15,7 +15,7 @@ import (
 
 // Injectors from wire.go:
 
-func InitializeUserHandler() *http.UserHandler {
+func InitializeUsersHandler() *http.UserHandler {
 	userRepository := db.NewUserRepositoryProvider()
 	notifier := smtp.NewNotifierProvider()
 	userService := usecases.NewCreateUserProvider(userRepository, notifier)
