@@ -3,6 +3,7 @@ package db
 import (
 	"api/core/domain"
 	"api/core/ports/outgoing"
+	"api/infra/config"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -22,19 +23,21 @@ type UserRepository struct {
 	redisCLient *redis.Client
 }
 
-func NewUserRepository() *UserRepository {
+func NewUserRepository(config  *config.Config) *UserRepository {
+	fmt.Println(config)
 	return &UserRepository{
 		redisCLient: redis.NewClient(&redis.Options{
-			Addr:     RedisHost,
-			Password: "", // no password set
+			Addr:     fmt.Sprintf("%s:%d", config.RedisHost , config.RedisPort),
+			Password: config.RedisPassword, // no password set
+			Username: "default", // use default username
 			DB:       0,  // use default DB
 		}),
 	}
 }
 
 // Provider for UserRepository
-func NewUserRepositoryProvider() outgoing.UserRepository {
-	return NewUserRepository()
+func NewUserRepositoryProvider(config *config.Config) outgoing.UserRepository {
+	return NewUserRepository(config)
 }
 
 func (r *UserRepository) Save(user domain.User) (string, error) {
