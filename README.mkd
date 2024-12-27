@@ -1,0 +1,20 @@
+### README file for API-GO project
+---
+### This is a guide to build and run the API-GO 
+
+> This projet is not in any production environment, it is only a proof of conecept using wire, go-chi in a port and adapters architecture.
+
+In some many cases I want to find the best combination of technologies and patterns and its advantages, I am always learning and practicing new or interesting things. This project is only one more attempt.
+
+To run the project we first need to run:
+~~~
+wire ./cmd/app
+~~~
+
+This command must be ran from the root directory. The result of its execution is a new file called 
+**write_gen.go** it's used in the **main.go** file
+
+Once ran the above code, we have to run **go run ./cmd** command, this command run the go program, basically run the REST API esposing the following list of oendpoint.
+
+- /users  --> METHODS: GET, POST and DELETE
+
