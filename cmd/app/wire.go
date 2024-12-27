@@ -8,16 +8,18 @@ import (
 	"api/adapters/outgoing/db"
 	"api/adapters/outgoing/smtp"
 	"api/core/usecases"
+	"api/infra/config"
 	"github.com/google/wire"
 
 )
 
-func InitializeUserHandler() *http.UserHandler {
+func InitializeUsersHandler() *http.UserHandler {
 	wire.Build(
 		db.NewUserRepositoryProvider,
 		smtp.NewNotifierProvider,
 		usecases.NewCreateUserProvider,
 		http.NewUserHandlerProvider,
+		config.NewConfigProvider,
 	)
 	 return &http.UserHandler{}
 }

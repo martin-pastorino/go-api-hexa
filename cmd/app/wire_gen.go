@@ -11,12 +11,14 @@ import (
 	"api/adapters/outgoing/db"
 	"api/adapters/outgoing/smtp"
 	"api/core/usecases"
+	"api/infra/config"
 )
 
 // Injectors from wire.go:
 
 func InitializeUsersHandler() *http.UserHandler {
-	userRepository := db.NewUserRepositoryProvider()
+	configConfig := config.NewConfigProvider()
+	userRepository := db.NewUserRepositoryProvider(configConfig)
 	notifier := smtp.NewNotifierProvider()
 	userService := usecases.NewCreateUserProvider(userRepository, notifier)
 	userHandler := http.NewUserHandlerProvider(userService)
