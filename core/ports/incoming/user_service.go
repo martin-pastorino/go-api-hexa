@@ -1,9 +1,12 @@
 package incoming
 
-import "api/core/domain"
+import (
+	"api/core/domain"
+	"context"
+)
 
 type UserService interface {
-	CreateUser(name, email string) (string, error)
-	GetUser(email string) (domain.User, error)
-	DeleteUser(email string) error
+	CreateUser(ctx context.Context, name, email string) (string, error)
+	GetUser(ctx context.Context, email string) (domain.User, error)
+	DeleteUser(ctx context.Context, email string) error
 }

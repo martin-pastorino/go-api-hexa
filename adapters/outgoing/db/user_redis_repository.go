@@ -27,7 +27,7 @@ func NewUserRepository(config  *config.Config) *UserRepository {
 	fmt.Println(config)
 	return &UserRepository{
 		redisCLient: redis.NewClient(&redis.Options{
-			Addr:     fmt.Sprintf("%s:%d", config.RedisHost , config.RedisPort),
+			Addr:     fmt.Sprintf("%s:%s", config.RedisHost , config.RedisPort),
 			Password: config.RedisPassword, // no password set
 			Username: "default", // use default username
 			DB:       0,  // use default DB

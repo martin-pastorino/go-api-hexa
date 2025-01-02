@@ -1,14 +1,16 @@
 package config
 
+import "os"
 
-var redisHost string = "localhost"
-var redisPort  int = 6379
+
+var redisHost string = os.Getenv("REDIS_HOST")
+var redisPort  string = os.Getenv("REDIS_PORT")
 var redisPassword string  = ""
 
 
 type Config struct {
 	RedisHost string
-	RedisPort int
+	RedisPort string
 	RedisPassword string
 }
 

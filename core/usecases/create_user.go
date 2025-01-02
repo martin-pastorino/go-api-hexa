@@ -4,6 +4,7 @@ import (
 	"api/core/domain"
 	"api/core/ports/incoming"
 	"api/core/ports/outgoing"
+	"context"
 
 	"github.com/google/uuid"
 )
@@ -25,7 +26,7 @@ func NewCreateUser(userRepository outgoing.UserRepository, notifier outgoing.Not
 	}
 }
 
-func (uc *CreateUser) CreateUser(name, email string) (string, error) {
+func (uc *CreateUser) CreateUser(ctx context.Context, name, email string) (string, error) {
 
 	userID := uuid.New().String()
 
@@ -49,7 +50,7 @@ func (uc *CreateUser) CreateUser(name, email string) (string, error) {
 }
 
 // GetUser implements incoming.UserService.
-func (uc *CreateUser) GetUser(email string) (domain.User, error) {
+func (uc *CreateUser) GetUser(ctx context.Context, email string) (domain.User, error) {
 
 	user, err := uc.userRepository.GetUser(email)
 	if err != nil {
@@ -60,6 +61,6 @@ func (uc *CreateUser) GetUser(email string) (domain.User, error) {
 }
 
 // DeleteUser implements incoming.UserService.
-func (uc *CreateUser) DeleteUser(email string) error {
+func (uc *CreateUser) DeleteUser(ctx context.Context ,email string) error {
 	return uc.userRepository.DeleteUser(email)
 }

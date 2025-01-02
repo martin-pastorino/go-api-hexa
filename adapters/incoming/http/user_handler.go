@@ -1,6 +1,7 @@
 package http
 
 import (
+	"api/core"
 	"api/core/ports/incoming"
 	"encoding/json"
 	"net/http"
@@ -21,12 +22,14 @@ func NewUserHandlerProvider(userService incoming.UserService) *UserHandler {
 	return NewUserHandler(userService)
 }
 
-//// CreateUser godoc
+// // CreateUser godoc
 func (uh *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var userRequest struct {
 		Name  string `json:"name"`
 		Email string `json:"email"`
 	}
+
+	ctx := r.Context()
 
 	err := json.NewDecoder(r.Body).Decode(&userRequest)
 	if err != nil {
@@ -34,7 +37,7 @@ func (uh *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, err := uh.userService.CreateUser(userRequest.Name, userRequest.Email)
+	userID, err := uh.userService.CreateUser(ctx, userRequest.Name, userRequest.Email)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -44,10 +47,12 @@ func (uh *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"id": userID})
 }
 
-//// GetUser godoc
+// // GetUser godoc
 func (uh *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
-	user, err := uh.userService.GetUser(email)
+	ctx := r.Context()
+
+	user, err := uh.userService.GetUser(ctx, email)
 	if err != nil || user.ID == "" {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -59,7 +64,8 @@ func (uh *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 
 func (uh *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
-	err := uh.userService.DeleteUser(email)
+	ctx := r.Context()
+	err := uh.userService.DeleteUser(ctx, email)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
