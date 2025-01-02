@@ -18,5 +18,3 @@ Once ran the above code, we have to run **go run ./cmd** command, this command r
 
 - /users  --> METHODS: GET, POST and DELETE
 
-bla bla
-
