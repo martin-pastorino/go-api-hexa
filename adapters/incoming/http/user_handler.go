@@ -1,7 +1,6 @@
 package http
 
 import (
-	"api/core"
 	"api/core/ports/incoming"
 	"encoding/json"
 	"net/http"
