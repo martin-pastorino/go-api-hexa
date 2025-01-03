@@ -15,43 +15,14 @@ RUN go mod download
 COPY . .
 
 # Build the Go app
-RUN go build -o main ./cmd/.
+RUN go build -o ./cmd/main ./cmd/.
+
+ENV ENV prod
 
 #  Expose port 8080 to the outside world
 EXPOSE 8080
 
 # Command to run the executable
-CMD ["./main"]
+CMD ["./cmd/main"]
 
-# # Etapa 1: Build
-# FROM golang:1.23.3 AS builder
 
-# # Establecer el directorio de trabajo
-# WORKDIR /app
-
-# # Copiar los archivos necesarios para las dependencias
-# COPY go.mod go.sum ./
-
-# # Descargar las dependencias
-# RUN go mod download
-
-# # Copiar todo el proyecto (necesario para compilar)
-# COPY . .
-
-# # Construir el binario
-# RUN go build -o main ./cmd/.
-
-# # Etapa 2: Imagen final
-# FROM alpine:latest
-
-# # Establecer el directorio de trabajo en la nueva imagen
-# WORKDIR /root/
-
-# # Copiar el binario desde la etapa builder
-# COPY --from=builder /app/main .
-
-# # Exponer el puerto necesario
-# EXPOSE 8080
-
-# # Ejecutar el binario al iniciar el contenedor
-# CMD ["./main"]

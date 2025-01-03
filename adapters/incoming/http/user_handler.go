@@ -1,8 +1,11 @@
 package http
 
 import (
+	"api/core/domain"
+	core_errors "api/core/errors"
 	"api/core/ports/incoming"
 	"encoding/json"
+	"errors"
 	"net/http"
 )
 
@@ -23,11 +26,7 @@ func NewUserHandlerProvider(userService incoming.UserService) *UserHandler {
 
 // // CreateUser godoc
 func (uh *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var userRequest struct {
-		Name  string `json:"name"`
-		Email string `json:"email"`
-	}
-
+	var  userRequest domain.User
 	ctx := r.Context()
 
 	err := json.NewDecoder(r.Body).Decode(&userRequest)
@@ -36,8 +35,13 @@ func (uh *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, err := uh.userService.CreateUser(ctx, userRequest.Name, userRequest.Email)
+	userID, err := uh.userService.CreateUser(ctx,userRequest )
 	if err != nil {
+		var alreadyExists  *core_errors.AlreadyExists
+		if errors.As(err, &alreadyExists) {
+			http.Error(w, err.Error(), alreadyExists.Code)
+			return
+		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

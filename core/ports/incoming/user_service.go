@@ -6,7 +6,7 @@ import (
 )
 
 type UserService interface {
-	CreateUser(ctx context.Context, name, email string) (string, error)
+	CreateUser(ctx context.Context, user domain.User) (string, error)
 	GetUser(ctx context.Context, email string) (domain.User, error)
 	DeleteUser(ctx context.Context, email string) error
 }

@@ -20,7 +20,7 @@ func InitializeUsersHandler() *http.UserHandler {
 	configConfig := config.NewConfigProvider()
 	userRepository := db.NewUserRepositoryProvider(configConfig)
 	notifier := smtp.NewNotifierProvider()
-	userService := usecases.NewCreateUserProvider(userRepository, notifier)
+	userService := usecases.NewUserUseCaseProvider(userRepository, notifier)
 	userHandler := http.NewUserHandlerProvider(userService)
 	return userHandler
 }
