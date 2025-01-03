@@ -27,22 +27,17 @@ func NewUserUseCase(userRepository outgoing.UserRepository, notifier outgoing.No
 }
 
 //// CreateUser implements incoming.UserService.
-func (uc *UserUseCase) CreateUser(ctx context.Context, name, email string) (string, error) {
+func (uc *UserUseCase) CreateUser(ctx context.Context, user domain.User) (string, error) {
 
 	userID := uuid.New().String()
-
-	user := domain.User{
-		ID:    userID,
-		Name:  name,
-		Email: email,
-	}
+	user.ID = userID
 
 	id, err := uc.userRepository.Save(user)
 	if err != nil {
 		return "", err
 	}
 
-	err = uc.notifier.SendWelcomeEmail(email)
+	err = uc.notifier.SendWelcomeEmail(user.Email)
 	if err != nil {
 		return "", err
 	}

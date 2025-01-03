@@ -12,7 +12,7 @@
             "mode": "auto",
             "program": "${workspaceFolder}/cmd",
             "env": {
-                "ENV": "prod",
+                "ENV": "",
             }
         }
     ]
