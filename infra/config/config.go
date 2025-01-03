@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 type Config struct {
@@ -18,14 +19,13 @@ func loadConfig() *Config {
 	if env == "" {
 		env = "local"
 	}
-	isProd := env == "prod"
-
-	configFile := ""
-	if isProd {
-		configFile = fmt.Sprintf("infra/config/config.%s.json", env)
-	} else {
-		configFile = fmt.Sprintf("../infra/config/config.%s.json", env)
+	executable, err := os.Executable()
+	if err != nil {
+		return nil
 	}
+	executableDir := filepath.Dir(executable)
+	baseDir := filepath.Join(executableDir, "..") 
+	configFile := filepath.Join(baseDir, "infra", "config", fmt.Sprintf("config.%s.json", env))
 
 	file, err := os.Open(configFile)
 	if err != nil {
