@@ -9,24 +9,25 @@ import (
 	"github.com/google/uuid"
 )
 
-type CreateUser struct {
+type UserUseCase struct {
 	userRepository outgoing.UserRepository
 	notifier       outgoing.Notifier
 }
 
 // Provider for CreateUser use case
-func NewCreateUserProvider(userRepo outgoing.UserRepository, notifier outgoing.Notifier) incoming.UserService {
-	return NewCreateUser(userRepo, notifier)
+func NewUserUseCaseProvider(userRepo outgoing.UserRepository, notifier outgoing.Notifier) incoming.UserService {
+	return NewUserUseCase(userRepo, notifier)
 }
 
-func NewCreateUser(userRepository outgoing.UserRepository, notifier outgoing.Notifier) *CreateUser {
-	return &CreateUser{
+func NewUserUseCase(userRepository outgoing.UserRepository, notifier outgoing.Notifier) *UserUseCase {
+	return &UserUseCase{
 		userRepository: userRepository,
 		notifier:       notifier,
 	}
 }
 
-func (uc *CreateUser) CreateUser(ctx context.Context, name, email string) (string, error) {
+//// CreateUser implements incoming.UserService.
+func (uc *UserUseCase) CreateUser(ctx context.Context, name, email string) (string, error) {
 
 	userID := uuid.New().String()
 
@@ -50,7 +51,7 @@ func (uc *CreateUser) CreateUser(ctx context.Context, name, email string) (strin
 }
 
 // GetUser implements incoming.UserService.
-func (uc *CreateUser) GetUser(ctx context.Context, email string) (domain.User, error) {
+func (uc *UserUseCase) GetUser(ctx context.Context, email string) (domain.User, error) {
 
 	user, err := uc.userRepository.GetUser(email)
 	if err != nil {
@@ -61,6 +62,6 @@ func (uc *CreateUser) GetUser(ctx context.Context, email string) (domain.User, e
 }
 
 // DeleteUser implements incoming.UserService.
-func (uc *CreateUser) DeleteUser(ctx context.Context ,email string) error {
+func (uc *UserUseCase) DeleteUser(ctx context.Context ,email string) error {
 	return uc.userRepository.DeleteUser(email)
 }

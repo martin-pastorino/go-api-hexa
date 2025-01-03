@@ -2,18 +2,20 @@ package db
 
 import (
 	"api/core/domain"
+	"api/core/errors"
 	"api/core/ports/outgoing"
 	"api/infra/config"
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/redis/go-redis/v9"
 )
 
 const (
 	// RedisHost is the host of the Redis server.
-	RedisHost = "localhost:6379"
+	RedisHost      = "localhost:6379"
 	KEY_USER_CACHE = "user:%s"
 )
 
@@ -23,14 +25,14 @@ type UserRepository struct {
 	redisCLient *redis.Client
 }
 
-func NewUserRepository(config  *config.Config) *UserRepository {
+func NewUserRepository(config *config.Config) *UserRepository {
 	fmt.Println(config)
 	return &UserRepository{
 		redisCLient: redis.NewClient(&redis.Options{
-			Addr:     fmt.Sprintf("%s:%s", config.RedisHost , config.RedisPort),
+			Addr:     fmt.Sprintf("%s:%s", config.RedisHost, config.RedisPort),
 			Password: config.RedisPassword, // no password set
-			Username: "default", // use default username
-			DB:       0,  // use default DB
+			Username: "default",            // use default username
+			DB:       0,                    // use default DB
 		}),
 	}
 }
@@ -45,7 +47,7 @@ func (r *UserRepository) Save(user domain.User) (string, error) {
 	key := fmt.Sprintf(KEY_USER_CACHE, user.Email)
 
 	if exists := r.redisCLient.Exists(ctx, key); exists.Val() == 1 {
-		return "", fmt.Errorf("user already exists")
+		return "", &errors.AlreadyExists{Message: "user already exists", Code: http.StatusConflict}
 	}
 
 	result, err := json.Marshal(user)
@@ -71,13 +73,13 @@ func (r *UserRepository) GetUser(email string) (domain.User, error) {
 		return domain.User{}, fmt.Errorf("user not found")
 	}
 
-	err := json.Unmarshal([]byte(result),&user)
+	err := json.Unmarshal([]byte(result), &user)
 	if err != nil {
 		return domain.User{}, err
 	}
 
 	return user, nil
-	
+
 }
 
 // DeleteUser implements outgoing.UserRepository.
@@ -87,7 +89,7 @@ func (r *UserRepository) DeleteUser(email string) error {
 	if err != nil {
 		return err
 	}
-	
+
 	fmt.Println("User deleted from database")
 	return nil
 }

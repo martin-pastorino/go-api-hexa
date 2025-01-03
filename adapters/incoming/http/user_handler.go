@@ -1,8 +1,10 @@
 package http
 
 import (
+	core_errors "api/core/errors"
 	"api/core/ports/incoming"
 	"encoding/json"
+	"errors"
 	"net/http"
 )
 
@@ -38,6 +40,11 @@ func (uh *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	userID, err := uh.userService.CreateUser(ctx, userRequest.Name, userRequest.Email)
 	if err != nil {
+		var alreadyExists  *core_errors.AlreadyExists
+		if errors.As(err, &alreadyExists) {
+			http.Error(w, err.Error(), alreadyExists.Code)
+			return
+		}
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

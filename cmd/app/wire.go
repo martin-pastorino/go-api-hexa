@@ -2,7 +2,6 @@
 // +build wireinject
 
 package app
-
 import (
 	"api/adapters/incoming/http"
 	"api/adapters/outgoing/db"
@@ -17,7 +16,7 @@ func InitializeUsersHandler() *http.UserHandler {
 	wire.Build(
 		db.NewUserRepositoryProvider,
 		smtp.NewNotifierProvider,
-		usecases.NewCreateUserProvider,
+		usecases.NewUserUseCaseProvider,
 		http.NewUserHandlerProvider,
 		config.NewConfigProvider,
 	)
