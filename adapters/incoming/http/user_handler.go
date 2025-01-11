@@ -1,7 +1,7 @@
 package http
 
 import (
-	"api/core/domain"
+	"api/adapters/dtos"
 	core_errors "api/core/errors"
 	"api/core/ports/incoming"
 	"encoding/json"
@@ -26,7 +26,7 @@ func NewUserHandlerProvider(userService incoming.UserService) *UserHandler {
 
 // // CreateUser godoc
 func (uh *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var  userRequest domain.User
+	var  userRequest dtos.User
 	ctx := r.Context()
 
 	err := json.NewDecoder(r.Body).Decode(&userRequest)
@@ -35,7 +35,7 @@ func (uh *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, err := uh.userService.CreateUser(ctx,userRequest )
+	userID, err := uh.userService.CreateUser(ctx, userRequest.ToUserDomainModel()) 
 	if err != nil {
 		var alreadyExists  *core_errors.AlreadyExists
 		if errors.As(err, &alreadyExists) {

@@ -12,6 +12,7 @@ type Config struct {
 	RedisHost     string `json:"redis_host"`
 	RedisPort     string `json:"redis_port"`
 	RedisPassword string `json:"redis_password"`
+	MongoUrl      string `json:"mongo_url"`
 }
 
 func loadConfig() *Config {
@@ -24,7 +25,7 @@ func loadConfig() *Config {
 		return nil
 	}
 	executableDir := filepath.Dir(executable)
-	baseDir := filepath.Join(executableDir, "..") 
+	baseDir := filepath.Join(executableDir, "..")
 	configFile := filepath.Join(baseDir, "infra", "config", fmt.Sprintf("config.%s.json", env))
 
 	file, err := os.Open(configFile)

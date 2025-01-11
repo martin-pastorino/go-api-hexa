@@ -1,5 +1,7 @@
 {
     "redis_host": "redis-16763.c251.east-us-mz.azure.redns.redis-cloud.com",
     "redis_port": "16763",
-    "redis_password": "FymOeSnsf8qgtAyJY82o2QedH1NLWVPX"
+    "redis_password": "FymOeSnsf8qgtAyJY82o2QedH1NLWVPX",
+     "mongo_url": "mongodb+srv://martinpastorino:5GvF9qidaQh06Kwk@cluster0.67nnsf5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 }
+

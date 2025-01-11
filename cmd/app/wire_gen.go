@@ -9,6 +9,7 @@ package app
 import (
 	"api/adapters/incoming/http"
 	"api/adapters/outgoing/db"
+	"api/adapters/outgoing/db/mongoimpl"
 	"api/adapters/outgoing/smtp"
 	"api/core/usecases"
 	"api/infra/config"
@@ -18,7 +19,9 @@ import (
 
 func InitializeUsersHandler() *http.UserHandler {
 	configConfig := config.NewConfigProvider()
-	userRepository := db.NewUserRepositoryProvider(configConfig)
+	localCache := db.NewCacheProvider(configConfig)
+	database := mongoimpl.NewMongoClientProvider(configConfig)
+	userRepository := db.NewUserRepositoryProvider(configConfig, localCache, database)
 	notifier := smtp.NewNotifierProvider()
 	userService := usecases.NewUserUseCaseProvider(userRepository, notifier)
 	userHandler := http.NewUserHandlerProvider(userService)

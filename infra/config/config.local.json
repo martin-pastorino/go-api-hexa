@@ -1,5 +1,6 @@
 {
     "redis_host": "localhost",
     "redis_port": "6379",
-    "redis_password": ""
+    "redis_password": "",
+    "mongo_url": "mongodb://admin:secret@localhost:27017"
 }
