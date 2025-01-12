@@ -1,9 +1,12 @@
 package outgoing
 
-import "api/core/domain"
+import (
+	"api/core/domain"
+	"context"
+)
 
 type UserRepository interface {
-	Save(user domain.User) (string, error)	
-	GetUser(email string) (domain.User, error)
-	DeleteUser(email string) error
+	Save(ctx context.Context, user domain.User) (string, error)
+	GetUser(ctx context.Context, email string) (domain.User, error)
+	DeleteUser(ctx context.Context, email string) error
 }

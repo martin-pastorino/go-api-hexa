@@ -1,7 +1,7 @@
 package http
 
 import (
-	"api/core/domain"
+	"api/adapters/dtos"
 	core_errors "api/core/errors"
 	"api/core/ports/incoming"
 	"encoding/json"
@@ -26,16 +26,15 @@ func NewUserHandlerProvider(userService incoming.UserService) *UserHandler {
 
 // // CreateUser godoc
 func (uh *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var  userRequest domain.User
-	ctx := r.Context()
-
+	var  userRequest dtos.User
+	
 	err := json.NewDecoder(r.Body).Decode(&userRequest)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	userID, err := uh.userService.CreateUser(ctx,userRequest )
+	userID, err := uh.userService.CreateUser(r.Context(), userRequest.ToUserDomainModel()) 
 	if err != nil {
 		var alreadyExists  *core_errors.AlreadyExists
 		if errors.As(err, &alreadyExists) {
@@ -53,9 +52,8 @@ func (uh *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 // // GetUser godoc
 func (uh *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
-	ctx := r.Context()
 
-	user, err := uh.userService.GetUser(ctx, email)
+	user, err := uh.userService.GetUser(r.Context(), email)
 	if err != nil || user.ID == "" {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
@@ -67,8 +65,8 @@ func (uh *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 
 func (uh *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
-	ctx := r.Context()
-	err := uh.userService.DeleteUser(ctx, email)
+	
+	err := uh.userService.DeleteUser(r.Context(), email)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
