@@ -17,7 +17,7 @@ var port int16 = 8080
 
 func main() {
 	r := chi.NewRouter()
-
+	
 	// A good base middleware stack
 	r.Use(localMiddleware.Recovery)
 	r.Use(localMiddleware.RequiredHeaders)

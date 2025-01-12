@@ -9,6 +9,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -16,10 +17,8 @@ import (
 
 const (
 	KEY_USER_CACHE = "user:%s"
-	TTL            = 60 * 60
+	TTL            = 15
 )
-
-var ctx = context.Background()
 
 type UserRepository struct {
 	*LocalCache
@@ -43,7 +42,7 @@ func (r *UserRepository) Save(ctx context.Context, user domain.User) (string, er
 	// Save user to database
 	key := fmt.Sprintf(KEY_USER_CACHE, user.Email)
 
-	savedUser, err := r.collection.InsertOne(ctx, user)
+	savedUser, err := r.collection.InsertOne(ctx, mongomodel.ToMongoDB(user))
 	if err != nil {
 		if mongo.IsDuplicateKeyError(err) {
 			return "", errors.NewAlreadyExists("user already exists")
@@ -56,7 +55,7 @@ func (r *UserRepository) Save(ctx context.Context, user domain.User) (string, er
 		return "", err
 	}
 
-	err = r.cache.Set(ctx, key, result, TTL).Err()
+	err = r.cache.Set(ctx, key, result, time.Minute*TTL).Err()
 	if err != nil {
 		return "", err
 	}
@@ -72,7 +71,8 @@ func (r *UserRepository) GetUser(ctx context.Context, email string) (domain.User
 
 	if result == "" {
 		var userDb mongomodel.MongoDB
-		r.collection.FindOne(ctx, bson.M{"email": email}).Decode(&userDb)
+		filter := bson.D{{Key: "email", Value: email}}
+		r.collection.FindOne(context.TODO(), filter).Decode(&userDb)
 		user = userDb.ToDomain()
 		if user.Email == "" {
 			return domain.User{}, fmt.Errorf("user not found")
@@ -91,13 +91,17 @@ func (r *UserRepository) GetUser(ctx context.Context, email string) (domain.User
 }
 
 // DeleteUser implements outgoing.UserRepository.
-func (r *UserRepository) DeleteUser(ctx context.Context, email string) error {
+func (r *UserRepository) DeleteUser(ctx context.Context, email string) (string, error) {
 	key := fmt.Sprintf(KEY_USER_CACHE, email)
 	err := r.cache.Del(ctx, key).Err()
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	fmt.Println("User deleted from database")
-	return nil
+	_, err = r.collection.DeleteOne(ctx, bson.M{"email": email})
+	if err != nil {
+		return "", err
+	}
+
+	return email, nil
 }

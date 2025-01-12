@@ -11,11 +11,21 @@ type User struct {
 }
 
 func (u User) ToUserDomainModel() domain.User {
-	return domain.User{	
+	return domain.User{
 		ID:      u.ID,
 		Name:    u.Name,
 		Email:   u.Email,
 		Phone:   u.Phone,
 		Address: u.Address,
+	}
+}
+
+func  ToUser(user domain.User) User {
+	return User {
+		ID: user.ID,
+		Name: user.Name,
+		Email: user.Email,
+		Phone: user.Phone,
+		Address: user.Address,
 	}
 }

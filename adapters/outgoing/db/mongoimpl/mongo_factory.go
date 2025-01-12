@@ -18,7 +18,6 @@ func NewMongoClient(config *config.Config) *mongo.Database {
 	err = client.Ping(context.Background(), nil)
 	if err != nil {
 		return nil
-
 	}
 
 	db := client.Database(DATABASE_NAME)
@@ -27,7 +26,7 @@ func NewMongoClient(config *config.Config) *mongo.Database {
 		return result
 	}
 
-	return client.Database(DATABASE_NAME)
+	return db
 }
 
 func applyIndexes(db *mongo.Database) (bool, *mongo.Database) {

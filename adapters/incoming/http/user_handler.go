@@ -26,17 +26,17 @@ func NewUserHandlerProvider(userService incoming.UserService) *UserHandler {
 
 // // CreateUser godoc
 func (uh *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var  userRequest dtos.User
-	
+	var userRequest dtos.User
+
 	err := json.NewDecoder(r.Body).Decode(&userRequest)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	userID, err := uh.userService.CreateUser(r.Context(), userRequest.ToUserDomainModel()) 
+	userID, err := uh.userService.CreateUser(r.Context(), userRequest.ToUserDomainModel())
 	if err != nil {
-		var alreadyExists  *core_errors.AlreadyExists
+		var alreadyExists *core_errors.AlreadyExists
 		if errors.As(err, &alreadyExists) {
 			http.Error(w, err.Error(), alreadyExists.Code)
 			return
@@ -54,23 +54,29 @@ func (uh *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
 
 	user, err := uh.userService.GetUser(r.Context(), email)
+
 	if err != nil || user.ID == "" {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(user)
+	json.NewEncoder(w).Encode(dtos.ToUser(user))
 }
 
 func (uh *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
-	
-	err := uh.userService.DeleteUser(r.Context(), email)
+
+	result, err := uh.userService.DeleteUser(r.Context(), email)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	type Result struct {
+		Email string `json:"email"`
+	}
+
 	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(Result{Email: result})
 }
