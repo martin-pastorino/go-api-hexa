@@ -19,6 +19,7 @@ func main() {
 	r := chi.NewRouter()
 
 	// A good base middleware stack
+	r.Use(localMiddleware.Recovery)
 	r.Use(localMiddleware.RequiredHeaders)
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)

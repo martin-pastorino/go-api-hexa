@@ -1,6 +1,7 @@
 package db
 
 import (
+	mongomodel "api/adapters/outgoing/db/mongo_model"
 	"api/core/domain"
 	"api/core/errors"
 	"api/core/ports/outgoing"
@@ -15,6 +16,7 @@ import (
 
 const (
 	KEY_USER_CACHE = "user:%s"
+	TTL            = 60 * 60
 )
 
 var ctx = context.Background()
@@ -37,25 +39,24 @@ func NewUserRepositoryProvider(config *config.Config, cache *LocalCache, db *mon
 	return NewUserRepository(config, cache, db)
 }
 
-func (r *UserRepository) Save(user domain.User) (string, error) {
+func (r *UserRepository) Save(ctx context.Context, user domain.User) (string, error) {
 	// Save user to database
 	key := fmt.Sprintf(KEY_USER_CACHE, user.Email)
-
 
 	savedUser, err := r.collection.InsertOne(ctx, user)
 	if err != nil {
 		if mongo.IsDuplicateKeyError(err) {
-		return "", errors.NewAlreadyExists("user already exists")
+			return "", errors.NewAlreadyExists("user already exists")
 		}
 	}
-	
+
 	user.ID = savedUser.InsertedID.(bson.ObjectID).Hex()
 	result, err := json.Marshal(user)
 	if err != nil {
 		return "", err
 	}
 
-	err = r.cache.Set(ctx, key, result, 0).Err()
+	err = r.cache.Set(ctx, key, result, TTL).Err()
 	if err != nil {
 		return "", err
 	}
@@ -65,12 +66,19 @@ func (r *UserRepository) Save(user domain.User) (string, error) {
 }
 
 // GetUser implements outgoing.UserRepository.
-func (r *UserRepository) GetUser(email string) (domain.User, error) {
+func (r *UserRepository) GetUser(ctx context.Context, email string) (domain.User, error) {
 	var user domain.User
 	result := r.cache.Get(ctx, fmt.Sprintf(KEY_USER_CACHE, email)).Val()
 
 	if result == "" {
-		return domain.User{}, fmt.Errorf("user not found")
+		var userDb mongomodel.MongoDB
+		r.collection.FindOne(ctx, bson.M{"email": email}).Decode(&userDb)
+		user = userDb.ToDomain()
+		if user.Email == "" {
+			return domain.User{}, fmt.Errorf("user not found")
+		}
+
+		return user, nil
 	}
 
 	err := json.Unmarshal([]byte(result), &user)
@@ -83,7 +91,7 @@ func (r *UserRepository) GetUser(email string) (domain.User, error) {
 }
 
 // DeleteUser implements outgoing.UserRepository.
-func (r *UserRepository) DeleteUser(email string) error {
+func (r *UserRepository) DeleteUser(ctx context.Context, email string) error {
 	key := fmt.Sprintf(KEY_USER_CACHE, email)
 	err := r.cache.Del(ctx, key).Err()
 	if err != nil {

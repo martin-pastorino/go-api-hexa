@@ -26,13 +26,13 @@ func NewUserUseCase(userRepository outgoing.UserRepository, notifier outgoing.No
 	}
 }
 
-//// CreateUser implements incoming.UserService.
+// // CreateUser implements incoming.UserService.
 func (uc *UserUseCase) CreateUser(ctx context.Context, user domain.User) (string, error) {
 
 	userID := uuid.New().String()
 	user.ID = userID
 
-	id, err := uc.userRepository.Save(user)
+	id, err := uc.userRepository.Save(ctx, user)
 	if err != nil {
 		return "", err
 	}
@@ -48,7 +48,7 @@ func (uc *UserUseCase) CreateUser(ctx context.Context, user domain.User) (string
 // GetUser implements incoming.UserService.
 func (uc *UserUseCase) GetUser(ctx context.Context, email string) (domain.User, error) {
 
-	user, err := uc.userRepository.GetUser(email)
+	user, err := uc.userRepository.GetUser(ctx, email)
 	if err != nil {
 		return domain.User{}, err
 	}
@@ -57,6 +57,6 @@ func (uc *UserUseCase) GetUser(ctx context.Context, email string) (domain.User, 
 }
 
 // DeleteUser implements incoming.UserService.
-func (uc *UserUseCase) DeleteUser(ctx context.Context ,email string) error {
-	return uc.userRepository.DeleteUser(email)
+func (uc *UserUseCase) DeleteUser(ctx context.Context, email string) error {
+	return uc.userRepository.DeleteUser(ctx, email)
 }
