@@ -21,7 +21,7 @@ func InitializeUsersHandler() *http.UserHandler {
 	configConfig := config.NewConfigProvider()
 	localCache := db.NewCacheProvider(configConfig)
 	database := mongoimpl.NewMongoClientProvider(configConfig)
-	userRepository := db.NewUserRepositoryProvider(configConfig, localCache, database)
+	userRepository := db.NewUserRepositoryProvider(localCache, database)
 	notifier := smtp.NewNotifierProvider()
 	userService := usecases.NewUserUseCaseProvider(userRepository, notifier)
 	userHandler := http.NewUserHandlerProvider(userService)

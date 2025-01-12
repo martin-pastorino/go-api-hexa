@@ -5,7 +5,6 @@ import (
 	"api/core/domain"
 	"api/core/errors"
 	"api/core/ports/outgoing"
-	"api/infra/config"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -25,7 +24,7 @@ type UserRepository struct {
 	collection *mongo.Collection
 }
 
-func NewUserRepository(config *config.Config, cache *LocalCache, db *mongo.Database) *UserRepository {
+func NewUserRepository(cache *LocalCache, db *mongo.Database) *UserRepository {
 
 	return &UserRepository{
 		LocalCache: cache,
@@ -34,8 +33,8 @@ func NewUserRepository(config *config.Config, cache *LocalCache, db *mongo.Datab
 }
 
 // Provider for UserRepository
-func NewUserRepositoryProvider(config *config.Config, cache *LocalCache, db *mongo.Database) outgoing.UserRepository {
-	return NewUserRepository(config, cache, db)
+func NewUserRepositoryProvider(cache *LocalCache, db *mongo.Database) outgoing.UserRepository {
+	return NewUserRepository(cache, db)
 }
 
 func (r *UserRepository) Save(ctx context.Context, user domain.User) (string, error) {
