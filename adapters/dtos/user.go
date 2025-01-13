@@ -29,3 +29,13 @@ func  ToUser(user domain.User) User {
 		Address: user.Address,
 	}
 }
+
+func  ToUsers(user []domain.User) []User {
+	var users []User
+	for _, u := range user {
+		users = append(users, ToUser(u))
+		
+	}
+	return users
+}
+	

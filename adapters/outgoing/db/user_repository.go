@@ -104,3 +104,21 @@ func (r *UserRepository) DeleteUser(ctx context.Context, email string) (string, 
 
 	return email, nil
 }
+
+func (r *UserRepository) Search(ctx context.Context, email string) ([]domain.User, error) {
+	var users []domain.User
+	cursor, err := r.collection.Find(ctx, bson.M{"email": bson.M{"$regex": email, "$options": "i"}})
+	if err != nil {
+		return users, err
+	}
+
+	for cursor.Next(ctx) {
+		var user mongomodel.MongoDB
+		err := cursor.Decode(&user)
+		if err != nil {
+			return users, err
+		}
+		users = append(users, user.ToDomain())
+	}
+	return users, nil
+}

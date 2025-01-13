@@ -11,5 +11,6 @@ func UsersAPIRouter(userHandler *http.UserHandler) chi.Router {
 	r.Post("/", userHandler.CreateUser)
 	r.Get("/", userHandler.GetUser)
 	r.Delete("/", userHandler.DeleteUser)
+	r.Get("/search", userHandler.Search)
 	return r
 }

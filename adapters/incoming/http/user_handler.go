@@ -80,3 +80,17 @@ func (uh *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(Result{Email: result})
 }
+
+func (uh *UserHandler) Search(w http.ResponseWriter, r *http.Request) {
+	email := r.URL.Query().Get("email")
+
+	users, err := uh.userService.Search(r.Context(), email)
+
+	if err != nil || len(users) == 0 {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(dtos.ToUsers(users))
+}
