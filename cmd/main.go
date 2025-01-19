@@ -30,5 +30,7 @@ func main() {
 	r.Mount("/users", router.UsersAPIRouter(app.InitializeUsersHandler()))
 
 	fmt.Printf("Server running on port %d\n", port)
-	fmt.Println((http.ListenAndServe(fmt.Sprintf(":%d", port), r)))
+	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), r); err != nil {
+        fmt.Printf("Failed to start server: %v\n", err)
+    }
 }
