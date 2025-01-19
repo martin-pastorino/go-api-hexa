@@ -18,3 +18,21 @@ Once ran the above code, we have to run **go run ./cmd** command, this command r
 
 - /users  --> METHODS: GET, POST and DELETE
 
+
+
+
+### How to run the project
+--- 
+To run the project we first need to run:
+~~~
+wire ./cmd/app
+~~~
+This command must be ran from the root directory. The result of its execution is a new file called 
+**write_gen.go** it's used in the **main.go** file
+Once ran the above code, we have to run **go run ./cmd** command, this command run the go program, basically run the REST API esposing the following list of oendpoint.
+
+- /users  --> METHODS: GET, POST and DELETE 
+
+### Hwo to build with docker compose
+---
+podman compose up --build
