@@ -7,6 +7,8 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+
+	"github.com/go-chi/render"
 )
 
 type UserHandler struct {
@@ -28,8 +30,7 @@ func NewUserHandlerProvider(userService incoming.UserService) *UserHandler {
 func (uh *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var userRequest dtos.User
 
-	err := json.NewDecoder(r.Body).Decode(&userRequest)
-	if err != nil {
+	if err := render.Bind(r, &userRequest); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}

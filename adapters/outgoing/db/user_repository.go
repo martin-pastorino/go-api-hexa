@@ -41,7 +41,7 @@ func (r *UserRepository) Save(ctx context.Context, user domain.User) (string, er
 	// Save user to database
 	key := fmt.Sprintf(KEY_USER_CACHE, user.Email)
 
-	savedUser, err := r.collection.InsertOne(ctx, mongomodel.ToMongoDB(user))
+	savedUser, err := r.collection.InsertOne(ctx, mongomodel.ToDomainUserToMongoDBUser(user))
 	if err != nil {
 		if mongo.IsDuplicateKeyError(err) {
 			return "", errors.NewAlreadyExists("user already exists")
@@ -69,10 +69,10 @@ func (r *UserRepository) GetUser(ctx context.Context, email string) (domain.User
 	result := r.cache.Get(ctx, fmt.Sprintf(KEY_USER_CACHE, email)).Val()
 
 	if result == "" {
-		var userDb mongomodel.MongoDB
+		var userDb mongomodel.UserMongoDB
 		filter := bson.D{{Key: "email", Value: email}}
 		r.collection.FindOne(context.TODO(), filter).Decode(&userDb)
-		user = userDb.ToDomain()
+		user = userDb.ToMongoUserToDomainUser()
 		if user.Email == "" {
 			return domain.User{}, fmt.Errorf("user not found")
 		}
@@ -113,12 +113,12 @@ func (r *UserRepository) Search(ctx context.Context, email string) ([]domain.Use
 	}
 
 	for cursor.Next(ctx) {
-		var user mongomodel.MongoDB
+		var user mongomodel.UserMongoDB
 		err := cursor.Decode(&user)
 		if err != nil {
 			return users, err
 		}
-		users = append(users, user.ToDomain())
+		users = append(users, user.ToMongoUserToDomainUser())
 	}
 	return users, nil
 }

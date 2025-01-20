@@ -27,3 +27,13 @@ func InitializeUsersHandler() *http.UserHandler {
 	userHandler := http.NewUserHandlerProvider(userService)
 	return userHandler
 }
+
+func InitializeProductsHandler() *http.ProductHandler {
+	configConfig := config.NewConfigProvider()
+	localCache := db.NewCacheProvider(configConfig)
+	database := mongoimpl.NewMongoClientProvider(configConfig)
+	productRepository := db.NewProductRepositoryProvider(localCache, database)
+	productService := usecases.NewProductUseCaseProvider(productRepository)
+	productHandler := http.NewProductHandlerProvider(productService)
+	return productHandler
+}

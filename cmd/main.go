@@ -28,6 +28,7 @@ func main() {
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
 	r.Mount("/users", router.UsersAPIRouter(app.InitializeUsersHandler()))
+	r.Mount("/products", router.ProductAPIRouter(app.InitializeProductsHandler()))
 
 	fmt.Printf("Server running on port %d\n", port)
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), r); err != nil {
