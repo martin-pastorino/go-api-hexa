@@ -14,10 +14,9 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
-
 const (
 	KEY_PRODUCT_CACHE = "product:%s"
-	PROCUT_TTL            = 15
+	PROCUT_TTL        = 15
 )
 
 type ProductRepository struct {
@@ -91,19 +90,25 @@ func (r *ProductRepository) GetProduct(ctx context.Context, sku string) (domain.
 }
 
 // DeleteProduct implements outgoing.ProductRepository.
-func (r *ProductRepository) DeleteProduct(ctx context.Context, sku string) (string, error) {
-	key := fmt.Sprintf(KEY_PRODUCT_CACHE, sku)
-	err := r.cache.Del(ctx, key).Err()
-	if err != nil {
-		return "", err
-	}	
+func (r *ProductRepository) DeleteProduct(ctx context.Context, id string) (string, error) {
 
-	_, err = r.collection.DeleteOne(ctx, bson.M{"_id": sku})
+	// objectID, err := primitive.ObjectIDFromHex(id)
+	// if err != nil {
+	// 	return "", fmt.Errorf("ID inválido: %v", err)
+	// }
+
+	key := fmt.Sprintf(KEY_PRODUCT_CACHE, id)
+	err := r.cache.Del(ctx, key).Err()
 	if err != nil {
 		return "", err
 	}
 
-	return sku, nil
+	_, err = r.collection.DeleteOne(ctx, bson.M{"sku": id})
+	if err != nil {
+		return "", err
+	}
+
+	return id, nil
 }
 
 func (r *ProductRepository) Search(ctx context.Context, name string) ([]domain.Product, error) {
@@ -118,8 +123,8 @@ func (r *ProductRepository) Search(ctx context.Context, name string) ([]domain.P
 		err := cursor.Decode(&product)
 		if err != nil {
 			return products, err
-		}		
+		}
 		products = append(products, product.ToMongoProductToDomainProduct())
 	}
 	return products, nil
-}					
+}

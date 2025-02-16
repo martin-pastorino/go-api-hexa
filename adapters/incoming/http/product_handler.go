@@ -32,7 +32,7 @@ func (ph *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	
+
 	productID, err := ph.productService.CreateProduct(r.Context(), productRequest.ToProductDomainModel())
 	if err != nil {
 		var alreadyExists *core_errors.AlreadyExists
@@ -47,11 +47,10 @@ func (ph *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{"id": productID})
 
-
 }
 
 func (ph *ProductHandler) GetProduct(w http.ResponseWriter, r *http.Request) {
-	productId := r.URL.Query().Get("Id")
+	productId := r.URL.Query().Get("id")
 
 	product, err := ph.productService.GetProduct(r.Context(), productId)
 
@@ -65,10 +64,18 @@ func (ph *ProductHandler) GetProduct(w http.ResponseWriter, r *http.Request) {
 
 }
 
+// Validate sku query parameter before use it
 func (ph *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
-	productId := r.URL.Query().Get("Id")
 
-	result, err := ph.productService.DeleteProduct(r.Context(), productId)
+	productSKU := r.URL.Query().Get("sku")
+	if productSKU == "" {
+		render.Status(r, http.StatusBadRequest)
+		render.JSON(w, r, map[string]string{
+			"error": "sku query parameter is required",
+		})
+		return
+	}
+	result, err := ph.productService.DeleteProduct(r.Context(), productSKU)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

@@ -43,7 +43,7 @@ func (uc *ProductUserCase) GetProduct(ctx context.Context, sku string) (domain.P
 }
 
 // DeleteProduct implements incoming.ProductService.
-func (uc *ProductUserCase) DeleteProduct(ctx context.Context, sku string) (string, error) {
-	return uc.productRepository.DeleteProduct(ctx, sku)
+func (uc *ProductUserCase) DeleteProduct(ctx context.Context, id string) (string, error) {
+	return uc.productRepository.DeleteProduct(ctx, id)
 }
 

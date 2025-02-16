@@ -15,14 +15,19 @@ RUN go mod download
 COPY . .
 
 # Build the Go app
-RUN go build -o ./cmd/main ./cmd/.
+RUN CGO_ENABLED=0 GOOS=linux go build  -a -installsuffix cgo -o ./cmd/main ./cmd/.
+
+
+FROM alpine:latest
+
+RUN apk add --no-cache ca-certificates
+
+WORKDIR /root/
+
+COPY --from=builder /app .
 
 ENV ENV prod
 
-#  Expose port 8080 to the outside world
 EXPOSE 8080
 
-# Command to run the executable
 CMD ["./cmd/main"]
-
-

@@ -13,6 +13,7 @@
             "program": "${workspaceFolder}/cmd",
             "env": {
                 "ENV": "",
+                "PORT": "",
             }
         }
     ]
