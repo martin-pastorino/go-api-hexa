@@ -58,5 +58,4 @@ func (uc *UserUseCase) DeleteUser(ctx context.Context, email string) (string, er
 
 func (uc *UserUseCase) Search(ctx context.Context, email string) ([]domain.User, error) {
 	return uc.userRepository.Search(ctx, email)
-	// return uc.userRepository.Search(ctx, email)
 }
