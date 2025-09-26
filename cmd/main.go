@@ -11,11 +11,6 @@ import (
 	"strconv"
 	"syscall"
 	"time"
-
-	localMiddleware "api/infra/middleware"
-
-	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/render"
 )
 
 const (
@@ -57,17 +52,7 @@ func setupServer() *http.Server {
 	// API routes
 	r := router.New(userHandler, productHandler)
 
-	// Middleware stack
-	r.Use(localMiddleware.RequiredHeaders)
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.Logger)
-	r.Use(render.SetContentType(render.ContentTypeJSON))
 
-	// Health check endpoint
-	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-		render.JSON(w, r, map[string]string{"status": "ok"})
-	})
 
 	return &http.Server{
 		Addr:         fmt.Sprintf(":%d", getPort()),

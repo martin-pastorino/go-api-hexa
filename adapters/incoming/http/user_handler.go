@@ -53,12 +53,7 @@ func (uh *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 func (uh *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
 
-	user, err := uh.userService.GetUser(r.Context(), email)
-
-	if err != nil {
-		render.Render(w, r, ErrInternalServer(err))
-		return
-	}
+	user, _ := uh.userService.GetUser(r.Context(), email)
 
 	if user.ID == "" {
 		render.Render(w, r, ErrNotFound(errors.New("user not found")))
