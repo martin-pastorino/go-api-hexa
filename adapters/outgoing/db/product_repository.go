@@ -71,7 +71,7 @@ func (r *ProductRepository) GetProduct(ctx context.Context, sku string) (domain.
 	if result == "" {
 		var productDb mongomodel.ProductMongoDB
 		filter := bson.D{{Key: "sku", Value: sku}}
-		r.collection.FindOne(context.TODO(), filter).Decode(&productDb)
+		r.collection.FindOne(ctx, filter).Decode(&productDb)
 		product = productDb.ToMongoProductToDomainProduct()
 		if product.Sku == "" {
 			return domain.Product{}, fmt.Errorf("product not found")

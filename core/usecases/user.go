@@ -32,7 +32,7 @@ func (uc *UserUseCase) CreateUser(ctx context.Context, user domain.User) (string
 		return "", err
 	}
 
-	err = uc.notifier.SendWelcomeEmail(user.Email)
+	err = uc.notifier.SendWelcomeEmail(ctx, user.Email)
 	if err != nil {
 		return "", err
 	}
