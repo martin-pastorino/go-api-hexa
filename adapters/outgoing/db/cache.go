@@ -2,7 +2,9 @@ package db
 
 import (
 	"api/infra/config"
+	"context"
 	"fmt"
+	"time"
 
 	"github.com/google/wire"
 	"github.com/redis/go-redis/v9"
@@ -10,8 +12,23 @@ import (
 
 type Cache interface {
 	Set(key string, value interface{}, ttlSeconds int) error
-	Get(key string) (interface{}, error)
+	Get(key string) (string, error)
 	Delete(key string) error
+}
+
+func (lc *LocalCache) Set(key string, value interface{}, ttlSeconds int) error {
+	ctx := context.Background()
+	return lc.cache.Set(ctx, key, value, time.Duration(ttlSeconds)*time.Second).Err()
+}
+
+func (lc *LocalCache) Get(key string) (string, error) {
+	ctx := context.Background()
+	return lc.cache.Get(ctx, key).Result()
+}
+
+func (lc *LocalCache) Delete(key string) error {
+	ctx := context.Background()
+	return lc.cache.Del(ctx, key).Err()
 }
 
 type LocalCache struct {
@@ -35,4 +52,4 @@ func NewCacheProvider(config *config.Config) *LocalCache {
 	return NewCache(config)
 }
 
-var ProviderSet = wire.NewSet(NewCache,  wire.Bind(new(Cache), new(*LocalCache)))
+var ProviderSet = wire.NewSet(NewCache, wire.Bind(new(Cache), new(*LocalCache)))

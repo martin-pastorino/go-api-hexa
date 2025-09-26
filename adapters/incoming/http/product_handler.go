@@ -4,7 +4,6 @@ import (
 	"api/adapters/dtos"
 	core_errors "api/core/errors"
 	"api/core/ports/incoming"
-	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -44,9 +43,7 @@ func (ph *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"id": productID})
-
+	render.JSON(w, r, map[string]string{"id": productID})
 }
 
 func (ph *ProductHandler) GetProduct(w http.ResponseWriter, r *http.Request) {
@@ -59,8 +56,7 @@ func (ph *ProductHandler) GetProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(dtos.ToProduct(product))
+	render.JSON(w, r, dtos.ToProduct(product))
 
 }
 
@@ -85,7 +81,6 @@ func (ph *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) 
 		Id string `json:"id"`
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(Result{Id: result})
+	render.JSON(w, r, Result{Id: result})
 
 }

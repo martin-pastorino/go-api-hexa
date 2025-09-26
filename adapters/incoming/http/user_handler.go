@@ -4,7 +4,6 @@ import (
 	"api/adapters/dtos"
 	core_errors "api/core/errors"
 	"api/core/ports/incoming"
-	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -46,8 +45,7 @@ func (uh *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"id": userID})
+	render.JSON(w, r, map[string]string{"id": userID})
 }
 
 // // GetUser godoc
@@ -61,8 +59,7 @@ func (uh *UserHandler) GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(dtos.ToUser(user))
+	render.JSON(w, r, dtos.ToUser(user))
 }
 
 func (uh *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
@@ -78,8 +75,7 @@ func (uh *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		Email string `json:"email"`
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(Result{Email: result})
+	render.JSON(w, r, Result{Email: result})
 }
 
 func (uh *UserHandler) Search(w http.ResponseWriter, r *http.Request) {
@@ -92,6 +88,5 @@ func (uh *UserHandler) Search(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(dtos.ToUsers(users))
+	render.JSON(w, r, dtos.ToUsers(users))
 }
