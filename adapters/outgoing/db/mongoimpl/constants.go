@@ -9,4 +9,7 @@ const (
 
 	// Collections fields
 	FIELD_EMAIL = "email"
+
+	COLLECTION_PRODUCTS = "products"
+	FIELD_SKU = "sku"
 )

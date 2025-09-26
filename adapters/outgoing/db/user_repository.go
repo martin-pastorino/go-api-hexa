@@ -5,28 +5,36 @@ import (
 	"api/core/domain"
 	"api/core/errors"
 	"api/core/ports/outgoing"
-	"api/infra/config"
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 const (
 	KEY_USER_CACHE = "user:%s"
-	TTL            = 60 * 60
+	TTL            = 15
 )
-
-var ctx = context.Background()
 
 type UserRepository struct {
 	*LocalCache
 	collection *mongo.Collection
 }
 
-func NewUserRepository(config *config.Config, cache *LocalCache, db *mongo.Database) *UserRepository {
+func (r *UserRepository) cacheUser(ctx context.Context, user domain.User) error {
+	key := fmt.Sprintf(KEY_USER_CACHE, user.Email)
+	result, err := json.Marshal(user)
+	if err != nil {
+		return err
+	}
+	return r.cache.Set(ctx, key, result, time.Minute*TTL).Err()
+}
+
+func NewUserRepository(cache *LocalCache, db *mongo.Database) *UserRepository {
 
 	return &UserRepository{
 		LocalCache: cache,
@@ -35,15 +43,13 @@ func NewUserRepository(config *config.Config, cache *LocalCache, db *mongo.Datab
 }
 
 // Provider for UserRepository
-func NewUserRepositoryProvider(config *config.Config, cache *LocalCache, db *mongo.Database) outgoing.UserRepository {
-	return NewUserRepository(config, cache, db)
+func NewUserRepositoryProvider(cache *LocalCache, db *mongo.Database) outgoing.UserRepository {
+	return NewUserRepository(cache, db)
 }
 
 func (r *UserRepository) Save(ctx context.Context, user domain.User) (string, error) {
 	// Save user to database
-	key := fmt.Sprintf(KEY_USER_CACHE, user.Email)
-
-	savedUser, err := r.collection.InsertOne(ctx, user)
+	savedUser, err := r.collection.InsertOne(ctx, mongomodel.ToDomainUserToMongoDBUser(user))
 	if err != nil {
 		if mongo.IsDuplicateKeyError(err) {
 			return "", errors.NewAlreadyExists("user already exists")
@@ -51,16 +57,11 @@ func (r *UserRepository) Save(ctx context.Context, user domain.User) (string, er
 	}
 
 	user.ID = savedUser.InsertedID.(bson.ObjectID).Hex()
-	result, err := json.Marshal(user)
+
+	err = r.cacheUser(ctx, user)
 	if err != nil {
 		return "", err
 	}
-
-	err = r.cache.Set(ctx, key, result, TTL).Err()
-	if err != nil {
-		return "", err
-	}
-
 	fmt.Println("User saved to database")
 	return user.ID, nil
 }
@@ -71,13 +72,17 @@ func (r *UserRepository) GetUser(ctx context.Context, email string) (domain.User
 	result := r.cache.Get(ctx, fmt.Sprintf(KEY_USER_CACHE, email)).Val()
 
 	if result == "" {
-		var userDb mongomodel.MongoDB
-		r.collection.FindOne(ctx, bson.M{"email": email}).Decode(&userDb)
-		user = userDb.ToDomain()
+		var userDb mongomodel.UserMongoDB
+		filter := bson.D{{Key: "email", Value: email}}
+		r.collection.FindOne(context.TODO(), filter).Decode(&userDb)
+		user = userDb.ToMongoUserToDomainUser()
 		if user.Email == "" {
 			return domain.User{}, fmt.Errorf("user not found")
 		}
-
+		err := r.cacheUser(ctx, user)
+		if err != nil {
+			return domain.User{}, err
+		}
 		return user, nil
 	}
 
@@ -91,13 +96,38 @@ func (r *UserRepository) GetUser(ctx context.Context, email string) (domain.User
 }
 
 // DeleteUser implements outgoing.UserRepository.
-func (r *UserRepository) DeleteUser(ctx context.Context, email string) error {
+func (r *UserRepository) DeleteUser(ctx context.Context, email string) (string, error) {
 	key := fmt.Sprintf(KEY_USER_CACHE, email)
 	err := r.cache.Del(ctx, key).Err()
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	fmt.Println("User deleted from database")
-	return nil
+	_, err = r.collection.DeleteOne(ctx, bson.M{"email": email})
+	if err != nil {
+		return "", err
+	}
+
+	return email, nil
+}
+
+func (r *UserRepository) Search(ctx context.Context, email string) ([]domain.User, error) {
+	var users []domain.User
+	findOptions := options.Find()
+	findOptions.SetLimit(5)
+
+	cursor, err := r.collection.Find(ctx, bson.M{"email": bson.M{"$regex": email, "$options": "i"}}, findOptions)
+	if err != nil {
+		return users, err
+	}
+
+	for cursor.Next(ctx) {
+		var user mongomodel.UserMongoDB
+		err := cursor.Decode(&user)
+		if err != nil {
+			return users, err
+		}
+		users = append(users, user.ToMongoUserToDomainUser())
+	}
+	return users, nil
 }

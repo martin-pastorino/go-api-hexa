@@ -27,3 +27,17 @@ func InitializeUsersHandler() *http.UserHandler {
 	)
 	 return &http.UserHandler{}
 }
+
+func InitializeProductsHandler() *http.ProductHandler {
+	wire.Build(
+		db.NewProductRepositoryProvider,
+		db.NewCacheProvider,
+		mongoimpl.NewMongoClientProvider,
+		usecases.NewProductUseCaseProvider,
+		http.NewProductHandlerProvider,
+		config.NewConfigProvider,
+
+		
+	)
+	 return &http.ProductHandler{}
+}

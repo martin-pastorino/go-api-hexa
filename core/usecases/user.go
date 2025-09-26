@@ -5,8 +5,6 @@ import (
 	"api/core/ports/incoming"
 	"api/core/ports/outgoing"
 	"context"
-
-	"github.com/google/uuid"
 )
 
 type UserUseCase struct {
@@ -28,9 +26,6 @@ func NewUserUseCase(userRepository outgoing.UserRepository, notifier outgoing.No
 
 // // CreateUser implements incoming.UserService.
 func (uc *UserUseCase) CreateUser(ctx context.Context, user domain.User) (string, error) {
-
-	userID := uuid.New().String()
-	user.ID = userID
 
 	id, err := uc.userRepository.Save(ctx, user)
 	if err != nil {
@@ -57,6 +52,10 @@ func (uc *UserUseCase) GetUser(ctx context.Context, email string) (domain.User, 
 }
 
 // DeleteUser implements incoming.UserService.
-func (uc *UserUseCase) DeleteUser(ctx context.Context, email string) error {
+func (uc *UserUseCase) DeleteUser(ctx context.Context, email string) (string, error) {
 	return uc.userRepository.DeleteUser(ctx, email)
+}
+
+func (uc *UserUseCase) Search(ctx context.Context, email string) ([]domain.User, error) {
+	return uc.userRepository.Search(ctx, email)
 }
