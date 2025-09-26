@@ -74,7 +74,7 @@ func (r *UserRepository) GetUser(ctx context.Context, email string) (domain.User
 	if result == "" {
 		var userDb mongomodel.UserMongoDB
 		filter := bson.D{{Key: "email", Value: email}}
-		r.collection.FindOne(context.TODO(), filter).Decode(&userDb)
+		r.collection.FindOne(ctx, filter).Decode(&userDb)
 		user = userDb.ToMongoUserToDomainUser()
 		if user.Email == "" {
 			return domain.User{}, fmt.Errorf("user not found")

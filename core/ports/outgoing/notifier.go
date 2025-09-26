@@ -1,5 +1,7 @@
 package outgoing
 
+import "context"
+
 type Notifier interface {
-	SendWelcomeEmail(email string) error
+	SendWelcomeEmail(ctx context.Context, email string) error
 }

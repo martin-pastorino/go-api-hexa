@@ -2,6 +2,7 @@ package smtp
 
 import (
 	"api/core/ports/outgoing"
+	"context"
 	"fmt"
 )
 
@@ -16,7 +17,7 @@ func NewNotifierProvider() outgoing.Notifier {
     return NewNotifier()
 }
 
-func (n *Notifier) SendWelcomeEmail(email string) error {
+func (n *Notifier) SendWelcomeEmail(ctx context.Context, email string) error {
 	// Send welcome email
 	fmt.Println("Welcome email sent to", email)
 	return nil
