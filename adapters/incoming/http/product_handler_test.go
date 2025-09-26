@@ -125,7 +125,7 @@ func TestProductHandler_GetProduct(t *testing.T) {
 		productService := new(mocks.ProductService)
 		productHandler := NewProductHandler(productService)
 
-		productService.On("GetProduct", mock.Anything, "any_id").Return(domain.Product{}, assert.AnError)
+		productService.On("GetProduct", mock.Anything, "any_id").Return(domain.Product{}, nil)
 
 		req := httptest.NewRequest("GET", "/products?id=any_id", nil)
 		rr := httptest.NewRecorder()

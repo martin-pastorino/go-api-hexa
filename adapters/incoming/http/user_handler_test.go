@@ -130,7 +130,7 @@ func TestUserHandler_GetUser(t *testing.T) {
 		userService := new(mocks.UserService)
 		userHandler := NewUserHandler(userService)
 
-		userService.On("GetUser", mock.Anything, "any_email").Return(domain.User{}, assert.AnError)
+		userService.On("GetUser", mock.Anything, "any_email").Return(domain.User{}, nil)
 
 		req := httptest.NewRequest("GET", "/users?email=any_email", nil)
 		rr := httptest.NewRecorder()
@@ -198,7 +198,7 @@ func TestUserHandler_Search(t *testing.T) {
 	})
 
 	t.Run("should return 404 when no users are found", func(t *testing.T) {
-		userService.On("Search", mock.Anything, "any_email").Return([]domain.User{}, assert.AnError).Once()
+		userService.On("Search", mock.Anything, "any_email").Return([]domain.User{}, nil).Once()
 
 		req := httptest.NewRequest("GET", "/users/search?email=any_email", nil)
 		rr := httptest.NewRecorder()

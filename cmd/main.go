@@ -15,7 +15,6 @@ import (
 	localMiddleware "api/infra/middleware"
 
 	"github.com/go-chi/chi/middleware"
-	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 )
 
@@ -52,25 +51,23 @@ func main() {
 }
 
 func setupServer() *http.Server {
-	r := chi.NewRouter()
+	userHandler := app.InitializeUsersHandler()
+	productHandler := app.InitializeProductsHandler()
+
+	// API routes
+	r := router.New(userHandler, productHandler)
 
 	// Middleware stack
-	r.Use(localMiddleware.Recovery)
 	r.Use(localMiddleware.RequiredHeaders)
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
 	// Health check endpoint
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		render.JSON(w, r, map[string]string{"status": "ok"})
 	})
-
-	// API routes
-	r.Mount("/users", router.UsersAPIRouter(app.InitializeUsersHandler()))
-	r.Mount("/products", router.ProductAPIRouter(app.InitializeProductsHandler()))
 
 	return &http.Server{
 		Addr:         fmt.Sprintf(":%d", getPort()),

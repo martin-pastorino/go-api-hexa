@@ -14,6 +14,7 @@
 ## 1. Project Overview
 
 *   **Name:** `api-go`
+*   **GitHub Repository:** martin-pastorino/go-api-hexa
 *   **Description:** A RESTful API built in Go, currently in its initial version. It manages `products` and `users`.
 *   **Architecture:** Hexagonal Architecture (Ports and Adapters). This is a solid choice for decoupling the core logic from external concerns.
     *   **Core (`/core`):** Contains `domain` models, `ports` (interfaces), and `usecases` (business logic). This is the application's core, isolated from the outside world.

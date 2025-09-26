@@ -28,7 +28,7 @@ func (ph *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) 
 	var productRequest dtos.Product
 
 	if err := render.Bind(r, &productRequest); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		render.Render(w, r, ErrInvalidRequest(err))
 		return
 	}
 
@@ -36,13 +36,14 @@ func (ph *ProductHandler) CreateProduct(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		var alreadyExists *core_errors.AlreadyExists
 		if errors.As(err, &alreadyExists) {
-			http.Error(w, err.Error(), alreadyExists.Code)
+			render.Render(w, r, ErrAlreadyExists(err))
 			return
 		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		render.Render(w, r, ErrInternalServer(err))
 		return
 	}
 
+	render.Status(r, http.StatusCreated)
 	render.JSON(w, r, map[string]string{"id": productID})
 }
 
@@ -51,8 +52,13 @@ func (ph *ProductHandler) GetProduct(w http.ResponseWriter, r *http.Request) {
 
 	product, err := ph.productService.GetProduct(r.Context(), productId)
 
-	if err != nil || product.ID == "" {
-		http.Error(w, err.Error(), http.StatusNotFound)
+	if err != nil {
+		render.Render(w, r, ErrInternalServer(err))
+		return
+	}
+
+	if product.ID == "" {
+		render.Render(w, r, ErrNotFound(errors.New("product not found")))
 		return
 	}
 
@@ -65,15 +71,12 @@ func (ph *ProductHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) 
 
 	productSKU := r.URL.Query().Get("sku")
 	if productSKU == "" {
-		render.Status(r, http.StatusBadRequest)
-		render.JSON(w, r, map[string]string{
-			"error": "sku query parameter is required",
-		})
+		render.Render(w, r, ErrInvalidRequest(errors.New("sku query parameter is required")))
 		return
 	}
 	result, err := ph.productService.DeleteProduct(r.Context(), productSKU)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		render.Render(w, r, ErrInternalServer(err))
 		return
 	}
 
